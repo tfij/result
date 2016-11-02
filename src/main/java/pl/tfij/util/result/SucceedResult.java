@@ -1,6 +1,7 @@
 package pl.tfij.util.result;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,8 +31,13 @@ public class SucceedResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public T get() {
+    public T mustGet() {
         return value;
+    }
+
+    @Override
+    public Optional<T> get() {
+        return Optional.of(value);
     }
 
     @Override

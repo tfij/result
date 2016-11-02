@@ -40,14 +40,25 @@ class ResultSpec extends Specification  {
         Result.errorResult("error") || false
     }
 
-    def "get method should return value for succeed results"() {
+    @Unroll
+    def "get method should return optional value"() {
         expect:
-        Result.succedResult("ok!").get() == "ok!"
+        result.get() == expectedResult
+
+        where:
+        result                      || expectedResult
+        Result.succedResult("ok!")  || Optional.of("ok!")
+        Result.errorResult("error") || Optional.empty()
+    }
+
+    def "mustGet method should return value for succeed results"() {
+        expect:
+        Result.succedResult("ok!").mustGet() == "ok!"
     }
 
     def "get method should throw exception for error results"() {
         when:
-        Result.errorResult("error").get()
+        Result.errorResult("error").mustGet()
 
         then:
         thrown RuntimeException

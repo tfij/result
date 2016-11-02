@@ -1,6 +1,7 @@
 package pl.tfij.util.result;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,8 +29,13 @@ public class ErrorResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public T get() {
-        throw new RuntimeException("Can't get value from error result");
+    public T mustGet() {
+        throw new RuntimeException("Can't mustGet value from error result");
+    }
+
+    @Override
+    public Optional<T> get() {
+        return Optional.empty();
     }
 
     @Override

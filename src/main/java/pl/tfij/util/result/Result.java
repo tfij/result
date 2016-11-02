@@ -1,5 +1,6 @@
 package pl.tfij.util.result;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -15,7 +16,8 @@ public interface Result<T, E> {
     boolean isSucceed();
     <U> Result<U, E> map(Function<? super T, ? extends U> mapper);
     <U> Result<U, E> flatMap(Function<? super T, Result<U, E>> mapper);
-    T get();
+    T mustGet();
+    Optional<T> get();
     T orElse(T other);
     T orElseGet(Supplier<T> other);
     Result<T, E> peekError(Consumer<E> errorConsumer);
