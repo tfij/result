@@ -44,8 +44,13 @@ public class ErrorResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public T orElseGet(Supplier<T> other) {
-        return other.get();
+    public T orElseGet(Function<E, T> other) {
+        return other.apply(error);
+    }
+
+    @Override
+    public <X extends Throwable> T orElseThrow(Function<E, ? extends X> exceptionFunction) throws X {
+        throw exceptionFunction.apply(error);
     }
 
     @Override

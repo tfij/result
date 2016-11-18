@@ -1,7 +1,10 @@
 package pl.tfij.util.result
 
+import groovy.transform.EqualsAndHashCode
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.concurrent.Callable
 
 class ResultSpec extends Specification  {
 
@@ -12,7 +15,7 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult("ok!")  || Result.succedResult("ok!ok!")
+        Result.succeedResult("ok!") || Result.succeedResult("ok!ok!")
         Result.errorResult("error") || Result.errorResult("error")
     }
 
@@ -22,11 +25,11 @@ class ResultSpec extends Specification  {
         result.flatMap(mapFunction) == expectedResult
 
         where:
-        result                      | mapFunction                            || expectedResult
-        Result.succedResult("ok!")  | {it -> Result.succedResult(it+it)}     || Result.succedResult("ok!ok!")
-        Result.succedResult("ok!")  | {it -> Result.errorResult(it+"error")} || Result.errorResult("ok!error")
-        Result.errorResult("error") | {it -> Result.succedResult(it+it)}     || Result.errorResult("error")
-        Result.errorResult("error") | {it -> Result.errorResult(it+"error")} || Result.errorResult("error")
+        result                      | mapFunction                             || expectedResult
+        Result.succeedResult("ok!") | { it -> Result.succeedResult(it+it)}    || Result.succeedResult("ok!ok!")
+        Result.succeedResult("ok!") | { it -> Result.errorResult(it+"error")} || Result.errorResult("ok!error")
+        Result.errorResult("error") | {it -> Result.succeedResult(it+it)}     || Result.errorResult("error")
+        Result.errorResult("error") | {it -> Result.errorResult(it+"error")}  || Result.errorResult("error")
     }
 
     @Unroll
@@ -36,7 +39,7 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult("ok!")  || true
+        Result.succeedResult("ok!") || true
         Result.errorResult("error") || false
     }
 
@@ -47,13 +50,13 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult("ok!")  || Optional.of("ok!")
+        Result.succeedResult("ok!") || Optional.of("ok!")
         Result.errorResult("error") || Optional.empty()
     }
 
     def "mustGet method should return value for succeed results"() {
         expect:
-        Result.succedResult("ok!").mustGet() == "ok!"
+        Result.succeedResult("ok!").mustGet() == "ok!"
     }
 
     def "get method should throw exception for error results"() {
@@ -71,7 +74,7 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult('ok!')  || 'ok!'
+        Result.succeedResult('ok!') || 'ok!'
         Result.errorResult('error') || 'other'
     }
 
@@ -82,8 +85,28 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult('ok!')  || 'ok!'
+        Result.succeedResult('ok!') || 'ok!'
         Result.errorResult('error') || 'other'
+    }
+
+    def "orElseThrow method should throw exception for error result"() {
+        given:
+        def result = Result.errorResult('error')
+
+        when:
+        result.orElseThrow{ it -> new RuntimeException('ex:' + it)}
+
+        then:
+        def ex = thrown RuntimeException
+        ex.message == 'ex:error'
+    }
+
+    def "orElseThrow method should return value for succeed result"() {
+        given:
+        def result = Result.succeedResult('ok')
+
+        expect:
+        result.orElseThrow{ it -> new RuntimeException('ex:' + it)} == 'ok'
     }
 
     @Unroll
@@ -99,7 +122,7 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult("ok!")  || []
+        Result.succeedResult("ok!") || []
         Result.errorResult("error") || ['error']
     }
 
@@ -110,8 +133,39 @@ class ResultSpec extends Specification  {
 
         where:
         result                      || expectedResult
-        Result.succedResult("ok!")  || Result.succedResult("ok!")
+        Result.succeedResult("ok!") || Result.succeedResult("ok!")
         Result.errorResult("error") || Result.errorResult("errorerror")
+    }
+
+    def "method tryToDo should wrap exception"() {
+        expect:
+        Result.tryToDo(unsafeCode as Callable) == expectedResult
+
+        where:
+        unsafeCode                                || expectedResult
+        { -> 'ok!' }                              || Result.succeedResult("ok!")
+        { -> throw new SampleException("error") } || Result.errorResult(new SampleException("error"))
+    }
+
+    private static class SampleException extends Exception {
+        String msg
+
+        SampleException(String msg) {
+            super(msg)
+            this.msg = msg
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) return true
+            if (getClass() != o.class) return false
+            SampleException that = (SampleException) o
+            if (msg != that.msg) return false
+            return true
+        }
+
+        int hashCode() {
+            return (msg != null ? msg.hashCode() : 0)
+        }
     }
 
 }
