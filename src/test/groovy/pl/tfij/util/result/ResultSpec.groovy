@@ -1,10 +1,10 @@
 package pl.tfij.util.result
 
-import groovy.transform.EqualsAndHashCode
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.concurrent.Callable
+import java.util.function.Function
 
 class ResultSpec extends Specification  {
 
@@ -68,9 +68,9 @@ class ResultSpec extends Specification  {
     }
 
     @Unroll
-    def "orElse method should return 'other' value for error result"() {
+    def "getOrElse method should return 'other' value for error result"() {
         expect:
-        result.orElse('other') == expectedResult
+        result.getOrElse('other') == expectedResult
 
         where:
         result                      || expectedResult
@@ -79,9 +79,9 @@ class ResultSpec extends Specification  {
     }
 
     @Unroll
-    def "orElseGet method should return 'other' value for error result"() {
+    def "getOrElse method for function should return 'other' value for error result"() {
         expect:
-        result.orElseGet{'other'} == expectedResult
+        result.getOrElse({ error -> 'other' } as Function) == expectedResult
 
         where:
         result                      || expectedResult
@@ -89,24 +89,50 @@ class ResultSpec extends Specification  {
         Result.errorResult('error') || 'other'
     }
 
-    def "orElseThrow method should throw exception for error result"() {
+    @Unroll
+    def "orElse method should return 'other' value for error result"() {
+        expect:
+        result.orElse(other) == expectedResult
+
+        where:
+        result                      | other                             || expectedResult
+        Result.succeedResult('ok!') | Result.succeedResult('other ok!') || Result.succeedResult('ok!')
+        Result.succeedResult('ok!') | Result.errorResult('other error') || Result.succeedResult('ok!')
+        Result.errorResult('error') | Result.succeedResult('other ok!') || Result.succeedResult('other ok!')
+        Result.errorResult('error') | Result.errorResult('other error') || Result.errorResult('other error')
+    }
+
+    @Unroll
+    def "orElse method for function should return 'other' value for error result"() {
+        expect:
+        result.orElse{ e -> other } == expectedResult
+
+        where:
+        result                      | other                             || expectedResult
+        Result.succeedResult('ok!') | Result.succeedResult('other ok!') || Result.succeedResult('ok!')
+        Result.succeedResult('ok!') | Result.errorResult('other error') || Result.succeedResult('ok!')
+        Result.errorResult('error') | Result.succeedResult('other ok!') || Result.succeedResult('other ok!')
+        Result.errorResult('error') | Result.errorResult('other error') || Result.errorResult('other error')
+    }
+
+    def "getOrElseThrow method should throw exception for error result"() {
         given:
         def result = Result.errorResult('error')
 
         when:
-        result.orElseThrow{ it -> new RuntimeException('ex:' + it)}
+        result.getOrElseThrow{ it -> new RuntimeException('ex:' + it)}
 
         then:
         def ex = thrown RuntimeException
         ex.message == 'ex:error'
     }
 
-    def "orElseThrow method should return value for succeed result"() {
+    def "getOrElseThrow method should return value for succeed result"() {
         given:
         def result = Result.succeedResult('ok')
 
         expect:
-        result.orElseThrow{ it -> new RuntimeException('ex:' + it)} == 'ok'
+        result.getOrElseThrow{ it -> new RuntimeException('ex:' + it)} == 'ok'
     }
 
     @Unroll

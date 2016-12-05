@@ -10,9 +10,11 @@ public interface Result<T, E> {
     static<T, E> Result<T, E> succeedResult(T value) {
         return new SucceedResult<>(value);
     }
+
     static<T, E> Result<T, E> errorResult(E error) {
         return new ErrorResult<>(error);
     }
+
     static<T> Result<T, Exception> tryToDo(Callable<T> x) {
         try {
             return succeedResult(x.call());
@@ -21,14 +23,21 @@ public interface Result<T, E> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    static<T, E> Result<T, E> narrow(Result<? extends T, ? extends E> result) {
+        return (Result<T, E>) result;
+    }
+
     boolean isSucceed();
     <U> Result<U, E> map(Function<? super T, ? extends U> mapper);
     <U> Result<U, E> flatMap(Function<? super T, Result<U, E>> mapper);
     T mustGet();
     Optional<T> get();
-    T orElse(T other);
-    T orElseGet(Function<E, T> other);
-    <X extends Throwable> T orElseThrow(Function<E, ? extends X> exceptionFunction) throws X;
+    T getOrElse(T other);
+    T getOrElse(Function<? super E, ? extends T> other);
+    Result<T, E> orElse(Result<? extends T, ? extends E> other);
+    Result<T, E> orElse(Function<? super E, Result<? extends T, ? extends E>> other);
+    <X extends Throwable> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) throws X;
     Result<T, E> peekError(Consumer<E> errorConsumer);
     <E2> Result<T, E2> wrapError(Function<? super E, ? extends E2> wrapper);
 }

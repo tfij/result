@@ -41,17 +41,27 @@ public class SucceedResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public T orElse(T other) {
+    public T getOrElse(T other) {
         return value;
     }
 
     @Override
-    public T orElseGet(Function<E, T> other) {
+    public T getOrElse(Function<? super E, ? extends T> other) {
         return value;
     }
 
     @Override
-    public <X extends Throwable> T orElseThrow(Function<E, ? extends X> exceptionFunction) throws X {
+    public Result<T, E> orElse(Result<? extends T, ? extends E> other) {
+        return this;
+    }
+
+    @Override
+    public Result<T, E> orElse(Function<? super E, Result<? extends T, ? extends E>> other) {
+        return this;
+    }
+
+    @Override
+    public <X extends Throwable> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) throws X {
         return value;
     }
 
