@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class SucceedResult<T, E> implements Result<T, E> {
     private final T value;
@@ -61,7 +62,7 @@ public class SucceedResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public <X extends Throwable> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) throws X {
+    public <X extends RuntimeException> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) {
         return value;
     }
 
@@ -71,8 +72,13 @@ public class SucceedResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public <E2> Result<T, E2> wrapError(Function<? super E, ? extends E2> wrapper) {
+    public <E2> Result<T, E2> mapError(Function<? super E, ? extends E2> wrapper) {
         return new SucceedResult<>(value);
+    }
+
+    @Override
+    public Stream<T> stream() {
+        return Stream.of(value);
     }
 
     @Override

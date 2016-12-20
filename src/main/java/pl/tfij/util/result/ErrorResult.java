@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ErrorResult<T, E> implements Result<T, E> {
     private final E error;
@@ -30,7 +30,7 @@ public class ErrorResult<T, E> implements Result<T, E> {
 
     @Override
     public T mustGet() {
-        throw new RuntimeException("Can't mustGet value from error result");
+        throw new IllegalStateException("Can't mustGet value from error result");
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ErrorResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public <X extends Throwable> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) throws X {
+    public <X extends RuntimeException> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) {
         throw exceptionFunction.apply(error);
     }
 
@@ -70,8 +70,13 @@ public class ErrorResult<T, E> implements Result<T, E> {
     }
 
     @Override
-    public <E2> Result<T, E2> wrapError(Function<? super E, ? extends E2> wrapper) {
+    public <E2> Result<T, E2> mapError(Function<? super E, ? extends E2> wrapper) {
         return new ErrorResult<>(wrapper.apply(error));
+    }
+
+    @Override
+    public Stream<T> stream() {
+        return Stream.empty();
     }
 
     @Override

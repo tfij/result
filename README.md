@@ -12,3 +12,15 @@ Instead Try is a monad and give you fluent API but you can't work with custom er
 
 I prepare `Result` type which solves both problems. You can have custom error type and
 use fluent API with methods like `map()`, `orElse()` and so on.
+
+## Code example
+
+```Java
+double discount = 0.2;
+double DEFAULT_PRICE = 100;
+String priceInput = ""; // not validated input
+double calcylatedPrice = Result.tryToDo(() -> Double.parseDouble(priceInput))
+        .map(price -> price * discount)
+        .peekError(error -> log.warn(error.getMessage()))
+        .getOrElse(DEFAULT_PRICE);
+```

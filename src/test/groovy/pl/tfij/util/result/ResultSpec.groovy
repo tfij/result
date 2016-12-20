@@ -59,12 +59,12 @@ class ResultSpec extends Specification  {
         Result.succeedResult("ok!").mustGet() == "ok!"
     }
 
-    def "get method should throw exception for error results"() {
+    def "mustGet method should throw exception for error results"() {
         when:
         Result.errorResult("error").mustGet()
 
         then:
-        thrown RuntimeException
+        thrown IllegalStateException
     }
 
     @Unroll
@@ -155,7 +155,7 @@ class ResultSpec extends Specification  {
     @Unroll
     def "should wrap error value for error result"() {
         expect:
-        result.wrapError{it -> it+it} == expectedResult
+        result.mapError{ it -> it+it} == expectedResult
 
         where:
         result                      || expectedResult

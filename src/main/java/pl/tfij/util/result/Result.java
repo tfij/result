@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public interface Result<T, E> {
     static<T, E> Result<T, E> succeedResult(T value) {
@@ -37,7 +37,8 @@ public interface Result<T, E> {
     T getOrElse(Function<? super E, ? extends T> other);
     Result<T, E> orElse(Result<? extends T, ? extends E> other);
     Result<T, E> orElse(Function<? super E, Result<? extends T, ? extends E>> other);
-    <X extends Throwable> T getOrElseThrow(Function<E, ? extends X> exceptionFunction) throws X;
+    <X extends RuntimeException> T getOrElseThrow(Function<E, ? extends X> exceptionFunction);
     Result<T, E> peekError(Consumer<E> errorConsumer);
-    <E2> Result<T, E2> wrapError(Function<? super E, ? extends E2> wrapper);
+    <E2> Result<T, E2> mapError(Function<? super E, ? extends E2> wrapper);
+    Stream<T> stream();
 }
