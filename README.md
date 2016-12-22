@@ -5,13 +5,13 @@ The inspiration for this project was the functional approach to error handling, 
 has types [Either](http://www.scala-lang.org/api/2.9.3/scala/Either.html) and
 [Try](http://www.scala-lang.org/api/2.9.3/scala/util/Try.html).
 
-First one let you contains any type of error class but you have to check instance of class
-(in scala with pattern matting) or call method like isLeft() to handle the error.
+The first one is more generic, it lets to use any type of error class.
+On the other hand, to handle an error, checking an instance of subclass (in scala with a pattern matting) or calling a method like isLeft() is required.
 
-Instead Try is a monad and give you fluent API but you can't work with custom error class.
+Try is a monad with fluent API, unfortunately there's no possibility to use a custom error class.
 
-I prepare `Result` type which solves both problems. You can have custom error type and
-use fluent API with methods like `map()`, `orElse()` and so on.
+I prepare `Result` type which solves both problems. 
+This type allow to have a custom error type and use fluent API with methods like `map()`, `flatMap()`, `getOrElse()` and so on.
 
 ## Code example
 
