@@ -1,4 +1,5 @@
-# result - Functional way to handle errors in java
+# result - Functional way to handle errors in java 
+[![Travis](https://img.shields.io/travis/tfij/result.svg)]() [![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/https/oss.sonatype.org/pl.tfij/result.svg)]()
 
 The inspiration for this project was the functional approach to error handling, such as in
 [scala](http://www.scala-lang.org/). The scala
