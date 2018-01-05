@@ -1,4 +1,4 @@
-package pl.tfij.util.result
+package pl.tfij.result
 
 import spock.lang.Specification
 import spock.lang.Unroll

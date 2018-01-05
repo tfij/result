@@ -1,4 +1,4 @@
-package pl.tfij.util.result;
+package pl.tfij.result;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;

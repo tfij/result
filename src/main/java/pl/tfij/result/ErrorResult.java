@@ -1,4 +1,4 @@
-package pl.tfij.util.result;
+package pl.tfij.result;
 
 import java.util.Objects;
 import java.util.Optional;

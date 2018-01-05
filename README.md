@@ -24,3 +24,13 @@ double calcylatedPrice = Result.tryToDo(() -> Double.parseDouble(priceInput))
         .peekError(error -> log.warn(error.getMessage()))
         .getOrElse(DEFAULT_PRICE);
 ```
+
+## Maven
+
+```
+<dependency>
+  <groupId>pl.tfij</groupId>
+  <artifactId>result</artifactId>
+  <version>1.0</version>
+</dependency>
+```

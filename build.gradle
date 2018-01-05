@@ -1,8 +1,11 @@
-group 'tfij'
-version '1.0-SNAPSHOT'
-
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group 'pl.tfij'
+archivesBaseName = "result"
+version '1.0'
 
 sourceCompatibility = 1.8
 
@@ -12,4 +15,64 @@ repositories {
 
 dependencies {
     testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+}
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            pom.project {
+                name 'Functional resul'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Functional way to handle errors in java.'
+                url 'https://github.com/tfij/result'
+                scm {
+                    connection 'scm:git:https://github.com/tfij/result.git'
+                    developerConnection 'scm:git:https://github.com/tfij/result.git'
+                    url 'https://github.com/tfij/result.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'tfij'
+                        name 'Tomasz Fijałkowski'
+                        email 'kontakt@tfij.pl'
+                    }
+                }
+            }
+        }
+    }
 }
