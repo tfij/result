@@ -38,15 +38,18 @@ signing {
     sign configurations.archives
 }
 
+def username = project.hasProperty('ossrhUsername') ? ossrhUsername : "emptyUsername"
+def password = project.hasProperty('ossrhPassword') ? ossrhPassword : "emptyPassword"
+
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+                authentication(userName: username, password: password)
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+                authentication(userName: username, password: password)
             }
             pom.project {
                 name 'Functional resul'
@@ -74,5 +77,12 @@ uploadArchives {
                 }
             }
         }
+    }
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+        events "passed", "skipped", "failed"
     }
 }
