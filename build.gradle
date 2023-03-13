@@ -1,11 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'signing'
+plugins {
+    id 'java-library'
+    id 'groovy'
+    id 'maven-publish'
+    id 'signing'
+    id 'pl.allegro.tech.build.axion-release' version '1.14.1'
+}
 
 group 'pl.tfij'
 archivesBaseName = "result"
-version '1.0'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 
@@ -14,75 +17,91 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.3-groovy-4.0'
 }
 
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+tasks.named('jar') {
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version
+        )
+    }
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+test {
+    useJUnitPlatform()
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
-def username = project.hasProperty('ossrhUsername') ? ossrhUsername : "emptyUsername"
-def password = project.hasProperty('ossrhPassword') ? ossrhPassword : "emptyPassword"
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: username, password: password)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: username, password: password)
-            }
-            pom.project {
-                name 'Functional resul'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'Functional way to handle errors in java.'
-                url 'https://github.com/tfij/result'
-                scm {
-                    connection 'scm:git:https://github.com/tfij/result.git'
-                    developerConnection 'scm:git:https://github.com/tfij/result.git'
-                    url 'https://github.com/tfij/result.git'
+publishing {
+    publications {
+        sonatype(MavenPublication) {
+            artifactId = 'result'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
                 }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Functional resul'
+                description = 'Simple two layer cache.'
+                url = 'https://github.com/tfij/result'
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name.set('The Apache License, Version 2.0')
+                        url.set('http://www.apache.org/licenses/LICENSE-2.0.txt')
                     }
                 }
                 developers {
                     developer {
-                        id 'tfij'
-                        name 'Tomasz Fijałkowski'
-                        email 'kontakt@tfij.pl'
+                        id = 'tfij'
+                        name = 'Tomasz Fijałkowski'
+                        email = 'tomasz@chi.pl'
                     }
                 }
+                scm {
+                    connection = 'scm:git:https://github.com/tfij/result.git'
+                    developerConnection = 'scm:git:https://github.com/tfij/result.git'
+                    url = 'https://github.com/tfij/result.git'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = (version.toString().endsWith('SNAPSHOT')) ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = System.getenv('SONATYPE_USERNAME')
+                password = System.getenv('SONATYPE_PASSWORD')
             }
         }
     }
 }
 
-test {
-    testLogging {
-        exceptionFormat = 'full'
-        events "passed", "skipped", "failed"
+if (!(System.getenv('SIGNING_GPG_KEY_ID') as String)?.isEmpty()) {
+    signing {
+        useInMemoryPgpKeys(
+                System.getenv('SIGNING_GPG_KEY_ID') as String,
+                System.getenv('SIGNING_GPG_PRIVATE_KEY') as String,
+                System.getenv('SIGNING_GPG_PRIVATE_KEY_PASSWORD') as String
+        )
+        sign publishing.publications.sonatype
+    }
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
     }
 }
