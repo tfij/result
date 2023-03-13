@@ -164,13 +164,19 @@ class ResultSpec extends Specification  {
     }
 
     def "method tryToDo should wrap exception"() {
-        expect:
-        Result.tryToDo(unsafeCode as Callable) == expectedResult
+        given:
+        Callable unsafeCode = { 'ok!' }
 
-        where:
-        unsafeCode                                || expectedResult
-        { -> 'ok!' }                              || Result.succeedResult("ok!")
-        { -> throw new SampleException("error") } || Result.errorResult(new SampleException("error"))
+        expect:
+        Result.tryToDo(unsafeCode) == Result.succeedResult("ok!")
+    }
+
+    def "method tryToDo should wrap callable with no exception"() {
+        given:
+        Callable unsafeCode = { throw new SampleException("error") }
+
+        expect:
+        Result.tryToDo(unsafeCode) == Result.errorResult(new SampleException("error"))
     }
 
     private static class SampleException extends Exception {
