@@ -80,6 +80,11 @@ public class ErrorResult<T, E> implements Result<T, E> {
     }
 
     @Override
+    public Optional<E> getError() {
+        return Optional.of(error);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

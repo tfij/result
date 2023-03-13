@@ -179,6 +179,16 @@ class ResultSpec extends Specification  {
         Result.tryToDo(unsafeCode) == Result.errorResult(new SampleException("error"))
     }
 
+    def "method getError should return Optional with error object"() {
+        expect:
+        result.getError() == expectedResult
+
+        where:
+        result                      || expectedResult
+        Result.succeedResult("ok!") || Optional.empty()
+        Result.errorResult("error") || Optional.of("error")
+    }
+
     private static class SampleException extends Exception {
         String msg
 
