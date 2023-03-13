@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+    testCompile group: 'org.spockframework', name: 'spock-core', version: '2.3-groovy-4.0'
 }
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
