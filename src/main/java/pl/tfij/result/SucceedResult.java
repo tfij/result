@@ -81,6 +81,11 @@ public class SucceedResult<T, E> implements Result<T, E> {
     }
 
     @Override
+    public Optional<E> getError() {
+        return Optional.empty();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

@@ -41,4 +41,5 @@ public interface Result<T, E> {
     Result<T, E> peekError(Consumer<E> errorConsumer);
     <E2> Result<T, E2> mapError(Function<? super E, ? extends E2> wrapper);
     Stream<T> stream();
+    Optional<E> getError();
 }
