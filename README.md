@@ -31,6 +31,6 @@ double calcylatedPrice = Result.tryToDo(() -> Double.parseDouble(priceInput))
 <dependency>
   <groupId>pl.tfij</groupId>
   <artifactId>result</artifactId>
-  <version>1.0</version>
+  <version>v1.1.0</version>
 </dependency>
 ```
